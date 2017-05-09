@@ -25,8 +25,7 @@ class JsonEncodedDict(TypeDecorator):
     def process_result_value(self, value, dialect):
         return loads(value)
 
-mutable.MutableDict.associate_with(JsonEncodedDict)
-
+# mutable.MutableDict.associate_with(JsonEncodedDict)   # Toggle this to make the JSON data mutable
 
 Base = declarative.declarative_base()
 
@@ -61,9 +60,17 @@ def main():
         )
     session.commit()
 
-    for row in session.query(FlexibleStorage):
+    for row in session.query(FlexibleStorage).all():
         print(row)
 
+    # Tested below doesn't work without enabling making the record mutable
+    for row in session.query(FlexibleStorage).filter(FlexibleStorage.id == 1):
+        print(row)
+        row.data['key23'] = 'something else'
+    session.commit()
+
+    for row in session.query(FlexibleStorage).filter(FlexibleStorage.id == 1):
+        print(row)
 
 if __name__ == '__main__':
     main()
